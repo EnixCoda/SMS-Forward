@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SMS Forward</string>
+    <string name="app_shared_preferences_key">one.enix.forward.sharedPreferences</string>
+    <string name="target_phone_number_key">TARGET_PHONE_NUMBER</string>
+    <string name="target_phone_number_input_hint">enter the phone number forward to</string>
+    <string name="kill_app_hint_text">Feel free to remove this App from background App list, it will run permanently.</string>
+    <string name="default_forward_number">0</string>
+</resources>
