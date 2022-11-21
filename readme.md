@@ -23,3 +23,7 @@ Calls can be forwarded to a single phone thanks to carriers' call forwarding ser
 This app has only been tested on Android 7.1.1, but it should work for Android 5.0+ devices.
 
 This project is the minimal implementation of a text message forwarding app. There are some app in app markets offering similiar functionalities, but are too large.
+
+## License
+
+MIT
