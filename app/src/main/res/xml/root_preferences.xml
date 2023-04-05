@@ -1,0 +1,46 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:iconSpaceReserved="false">
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="@string/header_sms">
+
+        <SwitchPreferenceCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:key="@string/key_enable_sms"
+            app:iconSpaceReserved="false"
+            app:title="@string/enable_sms" />
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue=""
+            android:key="@string/key_target_sms"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/target_title_sms"
+            app:iconSpaceReserved="false"
+            app:summary="@string/target_summary_sms" />
+
+    </PreferenceCategory>
+    <PreferenceCategory
+        app:title="@string/header_telegram"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:key="@string/key_enable_telegram"
+            app:title="@string/enable_telegram" />
+        <EditTextPreference
+            android:defaultValue=""
+            android:key="@string/key_target_telegram"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/target_title_telegram"
+            app:iconSpaceReserved="false"
+            app:summary="@string/target_summary_telegram" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

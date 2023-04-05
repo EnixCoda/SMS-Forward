@@ -1,8 +1,20 @@
 <resources>
     <string name="app_name">SMS Forward</string>
     <string name="app_shared_preferences_key">one.enix.forward.sharedPreferences</string>
-    <string name="target_phone_number_key">TARGET_PHONE_NUMBER</string>
-    <string name="target_phone_number_input_hint">Enter the target phone number</string>
-    <string name="kill_app_hint_text">Feel free to remove this App from background App list, it will continue to work.</string>
-    <string name="default_forward_number"></string>
+
+    <!-- SMS -->
+    <string name="key_enable_sms">key_enable_sms</string>
+    <string name="header_sms">Forward via SMS</string>
+    <string name="enable_sms">Enable SMS</string>
+    <string name="key_target_sms">key_sms_target</string>
+    <string name="target_title_sms">Target phone number</string>
+    <string name="target_summary_sms">example: +86 10000</string>
+
+    <!-- Telegram -->
+    <string name="key_enable_telegram">key_enable_telegram</string>
+    <string name="header_telegram">Forward via Telegram</string>
+    <string name="enable_telegram">Enable Telegram</string>
+    <string name="key_target_telegram">key_target_telegram</string>
+    <string name="target_title_telegram">Target Telegram ID</string>
+    <string name="target_summary_telegram"></string>
 </resources>
