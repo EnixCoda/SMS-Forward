@@ -20,10 +20,14 @@ public class SMSReceiver extends BroadcastReceiver {
         final boolean enableSMS = sharedPreferences.getBoolean(context.getString(R.string.key_enable_sms), false);
         final String targetNumber = sharedPreferences.getString(context.getString(R.string.key_target_sms), "");
 
+        final boolean enableWeb = sharedPreferences.getBoolean(context.getString(R.string.key_enable_web), false);
+        final String targetWeb = sharedPreferences.getString(context.getString(R.string.key_target_web), "");
+
         final boolean enableTelegram = sharedPreferences.getBoolean(context.getString(R.string.key_enable_telegram), false);
         final String targetTelegram = sharedPreferences.getString(context.getString(R.string.key_target_telegram), "");
+        final String telegramToken = sharedPreferences.getString(context.getString(R.string.key_telegram_apikey), "");
 
-        if (!enableSMS && !enableTelegram) return;
+        if (!enableSMS && !enableTelegram && !enableWeb) return;
 
         final Bundle bundle = intent.getExtras();
         final Object[] pduObjects = (Object[]) bundle.get("pdus");
@@ -36,7 +40,7 @@ public class SMSReceiver extends BroadcastReceiver {
 
             if (senderNumber.equals(targetNumber)) {
                 // reverse message
-                String formatRegex = "to (\\+?\\d+?):\\n((.|\\n)*)";
+                String formatRegex = "To (\\+?\\d+?):\\n((.|\\n)*)";
                 if (rawMessageContent.equals(formatRegex)) {
                     String forwardNumber = rawMessageContent.replaceFirst(formatRegex, "$1");
                     String forwardContent = rawMessageContent.replaceFirst(formatRegex, "$2");
@@ -44,10 +48,12 @@ public class SMSReceiver extends BroadcastReceiver {
                 }
             } else {
                 // normal message, forwarded
-                if (enableSMS)
+                if (enableSMS && !targetNumber.equals(""))
                     Forwarder.forwardViaSMS(senderNumber, rawMessageContent, targetNumber);
-                if (enableTelegram)
-                    Forwarder.forwardViaTelegram(senderNumber, rawMessageContent, targetTelegram);
+                if (enableTelegram && !targetTelegram.equals("") && !telegramToken.equals(""))
+                    Forwarder.forwardViaTelegram(senderNumber, rawMessageContent, targetTelegram, telegramToken);
+                if (enableWeb && !targetWeb.equals(""))
+                    Forwarder.forwardViaWeb(senderNumber, rawMessageContent, targetWeb);
             }
         }
     }

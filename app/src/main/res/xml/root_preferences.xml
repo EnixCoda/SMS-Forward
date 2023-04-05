@@ -38,8 +38,33 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/target_title_telegram"
+            app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:defaultValue=""
+            android:key="@string/key_telegram_apikey"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/title_telegram_apikey"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/header_web"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
             app:iconSpaceReserved="false"
-            app:summary="@string/target_summary_telegram" />
+            android:key="@string/key_enable_web"
+            app:title="@string/enable_web" />
+        <EditTextPreference
+            android:defaultValue=""
+            android:key="@string/key_target_web"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/target_title_web"
+            android:summary="@string/target_summary_web"
+            app:iconSpaceReserved="false" />
 
     </PreferenceCategory>
 

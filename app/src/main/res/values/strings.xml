@@ -14,6 +14,15 @@
     <string name="header_telegram">Forward via Telegram</string>
     <string name="enable_telegram">Enable Telegram</string>
     <string name="key_target_telegram">key_target_telegram</string>
+    <string name="key_telegram_apikey">key_telegram_apikey</string>
     <string name="target_title_telegram">Target Telegram ID</string>
-    <string name="target_summary_telegram"></string>
+    <string name="title_telegram_apikey">Telegram API KEY</string>
+
+    <!-- Web -->
+    <string name="key_enable_web">key_enable_web</string>
+    <string name="header_web">Forward via Web</string>
+    <string name="enable_web">Enable Web</string>
+    <string name="key_target_web">key_target_web</string>
+    <string name="target_title_web">Target Web URL</string>
+    <string name="target_summary_web">Example: https://site.com/api\nThis app will send POST request on receive SMS, request body example:\n{ "from": "10000", "message": "Hello" }</string>
 </resources>
