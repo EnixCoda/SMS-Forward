@@ -1,4 +1,4 @@
-package one.enix.smsforward;
+package com.enixcoda.smsforward;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

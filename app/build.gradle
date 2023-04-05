@@ -4,7 +4,7 @@ android {
     compileSdkVersion 33
     buildToolsVersion "25.0.1"
     defaultConfig {
-        applicationId "one.enix.smsforward"
+        applicationId "com.enixcoda.smsforward"
         minSdkVersion 25
         versionCode 1
         versionName "1.0"

@@ -1,4 +1,4 @@
-package one.enix.smsforward;
+package com.enixcoda.smsforward;
 
 import android.net.Uri;
 import android.os.AsyncTask;

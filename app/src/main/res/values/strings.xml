@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">SMS Forward</string>
-    <string name="app_shared_preferences_key">one.enix.forward.sharedPreferences</string>
 
     <!-- SMS -->
     <string name="key_enable_sms">key_enable_sms</string>
