@@ -41,7 +41,7 @@ public class SMSReceiver extends BroadcastReceiver {
             if (senderNumber.equals(targetNumber)) {
                 // reverse message
                 String formatRegex = "To (\\+?\\d+?):\\n((.|\\n)*)";
-                if (rawMessageContent.equals(formatRegex)) {
+                if (rawMessageContent.matches(formatRegex)) {
                     String forwardNumber = rawMessageContent.replaceFirst(formatRegex, "$1");
                     String forwardContent = rawMessageContent.replaceFirst(formatRegex, "$2");
                     Forwarder.sendSMS(forwardNumber, forwardContent);
