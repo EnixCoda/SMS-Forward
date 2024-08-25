@@ -15,7 +15,8 @@ public class MainActivity extends AppCompatActivity {
 
         requestPermissions(new String[] {
                 Manifest.permission.SEND_SMS,
-                Manifest.permission.INTERNET
+                Manifest.permission.INTERNET,
+                Manifest.permission.READ_CONTACTS
         }, 0);
 
         if (savedInstanceState == null) {
