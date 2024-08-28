@@ -1,9 +1,13 @@
 package com.enixcoda.smsforward;
 
+import static android.provider.ContactsContract.CommonDataKinds.*;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 
@@ -36,6 +40,8 @@ public class SMSReceiver extends BroadcastReceiver {
         for (Object messageObj : pduObjects) {
             SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) messageObj, (String) bundle.get("format"));
             String senderNumber = currentMessage.getDisplayOriginatingAddress();
+            String senderNames = lookupContactName(context, senderNumber);
+            String senderLabel = (senderNames.isEmpty() ? "" : senderNames + " ") + "(" + senderNumber + ")";
             String rawMessageContent = currentMessage.getDisplayMessageBody();
 
             if (senderNumber.equals(targetNumber)) {
@@ -49,12 +55,29 @@ public class SMSReceiver extends BroadcastReceiver {
             } else {
                 // normal message, forwarded
                 if (enableSMS && !targetNumber.equals(""))
-                    Forwarder.forwardViaSMS(senderNumber, rawMessageContent, targetNumber);
+                    Forwarder.forwardViaSMS(senderLabel, rawMessageContent, targetNumber);
                 if (enableTelegram && !targetTelegram.equals("") && !telegramToken.equals(""))
-                    Forwarder.forwardViaTelegram(senderNumber, rawMessageContent, targetTelegram, telegramToken);
+                    Forwarder.forwardViaTelegram(senderLabel, rawMessageContent, targetTelegram, telegramToken);
                 if (enableWeb && !targetWeb.equals(""))
-                    Forwarder.forwardViaWeb(senderNumber, rawMessageContent, targetWeb);
+                    Forwarder.forwardViaWeb(senderLabel, rawMessageContent, targetWeb);
             }
         }
+    }
+
+    private String lookupContactName(Context context, String phoneNumber) {
+        Uri filterUri = Uri.withAppendedPath(Phone.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+        String[] projection = new String[]{Phone.DISPLAY_NAME};
+        String[] senderContactNames = {};
+        try (Cursor cur = context.getContentResolver().query(filterUri, projection, null, null, null)) {
+            if (cur != null) {
+                senderContactNames = new String[cur.getCount()];
+                int i = 0;
+                while (cur.moveToNext()) {
+                    senderContactNames[i] = cur.getString(0);
+                    i++;
+                }
+            }
+        }
+        return String.join(", ", senderContactNames);
     }
 }
