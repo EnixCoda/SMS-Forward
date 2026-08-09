@@ -9,9 +9,14 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsMessage;
 
+import android.telephony.TelephonyManager;
 import androidx.preference.PreferenceManager;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SMSReceiver extends BroadcastReceiver {
     @Override
@@ -23,6 +28,7 @@ public class SMSReceiver extends BroadcastReceiver {
 
         final boolean enableSMS = sharedPreferences.getBoolean(context.getString(R.string.key_enable_sms), false);
         final String targetNumber = sharedPreferences.getString(context.getString(R.string.key_target_sms), "");
+        final String defaultCountryIso = ((TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE)).getNetworkCountryIso();
 
         final boolean enableWeb = sharedPreferences.getBoolean(context.getString(R.string.key_enable_web), false);
         final String targetWeb = sharedPreferences.getString(context.getString(R.string.key_target_web), "");
@@ -44,14 +50,11 @@ public class SMSReceiver extends BroadcastReceiver {
             String senderLabel = (senderNames.isEmpty() ? "" : senderNames + " ") + "(" + senderNumber + ")";
             String rawMessageContent = currentMessage.getDisplayMessageBody();
 
-            if (senderNumber.equals(targetNumber)) {
+            if (areSamePhoneNumber(senderNumber, targetNumber, defaultCountryIso)) {
                 // reverse message
-                String formatRegex = "To (\\+?\\d+?):\\n((.|\\n)*)";
-                if (rawMessageContent.matches(formatRegex)) {
-                    String forwardNumber = rawMessageContent.replaceFirst(formatRegex, "$1");
-                    String forwardContent = rawMessageContent.replaceFirst(formatRegex, "$2");
-                    Forwarder.sendSMS(forwardNumber, forwardContent);
-                }
+                boolean isAttemptingReverseMessage = rawMessageContent.toLowerCase().startsWith("to");
+                if (isAttemptingReverseMessage)
+                    processReverseMessage(context, rawMessageContent, targetNumber, defaultCountryIso);
             } else {
                 // normal message, forwarded
                 if (enableSMS && !targetNumber.equals(""))
@@ -79,5 +82,40 @@ public class SMSReceiver extends BroadcastReceiver {
             }
         }
         return String.join(", ", senderContactNames);
+    }
+
+    private boolean areSamePhoneNumber(String phoneNumber1, String phoneNumber2,
+                                       String defaultCountryIso) {
+        return PhoneNumberUtils.formatNumberToE164(phoneNumber1, defaultCountryIso)
+                .equals(PhoneNumberUtils.formatNumberToE164(phoneNumber2, defaultCountryIso));
+    }
+
+    private static void processReverseMessage(Context context, String rawMessageContent,
+                                              String targetNumber, String defaultCountryIso) {
+        final String reverseMessageRegex = "^to\\s+([\\d\\-+()\\s]+):\\n?([\\s\\S]+)$";
+        Matcher matcher = Pattern
+                .compile(reverseMessageRegex, Pattern.CASE_INSENSITIVE)
+                .matcher(rawMessageContent);
+
+        if (!matcher.find()) {
+            Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_bad_format));
+            return;
+        }
+
+        String forwardNumber = PhoneNumberUtils.formatNumberToE164(matcher.group(1), defaultCountryIso);
+        if (forwardNumber == null) {
+            Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_bad_phone_number));
+            return;
+        }
+
+        String forwardContent = matcher.group(2);
+        if (forwardContent == null || forwardContent.isBlank()) {
+            Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_no_message_content));
+            return;
+        }
+
+        Forwarder.sendSMS(forwardNumber, forwardContent);
+
+        Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_successfully_sent_message_to) + forwardNumber);
     }
 }

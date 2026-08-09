@@ -25,4 +25,8 @@
     <string name="key_target_web">key_target_web</string>
     <string name="target_title_web">Target Web URL</string>
     <string name="target_summary_web">Example: https://site.com/api\nThis app will send POST request on receive SMS, request body example:\n{ "from": "10000", "message": "Hello" }</string>
+    <string name="reverse_message_bad_format">Message not sent because it did not match the expected format. Send a message with \'to {receive number}:\' followed by a line break and the message to send.</string>
+    <string name="reverse_message_bad_phone_number">Message not sent because the phone number provided is invalid</string>
+    <string name="reverse_message_no_message_content">Message not sent because no message content was found. Send a message with \'to {receive number}:\' followed by a line break and the message to send.</string>
+    <string name="reverse_message_successfully_sent_message_to">"Successfully sent message to "</string>
 </resources>
