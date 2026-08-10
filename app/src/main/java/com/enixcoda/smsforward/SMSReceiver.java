@@ -90,7 +90,7 @@ public class SMSReceiver extends BroadcastReceiver {
                 .equals(PhoneNumberUtils.formatNumberToE164(phoneNumber2, defaultCountryIso));
     }
 
-    private static void processReverseMessage(Context context, String rawMessageContent,
+    private void processReverseMessage(Context context, String rawMessageContent,
                                               String targetNumber, String defaultCountryIso) {
         final String reverseMessageRegex = "^to\\s+([\\d\\-+()\\s]+):\\n?([\\s\\S]+)$";
         Matcher matcher = Pattern
