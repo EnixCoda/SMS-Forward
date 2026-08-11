@@ -92,7 +92,7 @@ public class SMSReceiver extends BroadcastReceiver {
 
     private void processReverseMessage(Context context, String rawMessageContent,
                                               String targetNumber, String defaultCountryIso) {
-        final String reverseMessageRegex = "^to\\s+([\\d\\-+()\\s]+):\\n?([\\s\\S]+)$";
+        final String reverseMessageRegex = "^to\\s+([^:]+):\\n?([\\s\\S]+)$";
         Matcher matcher = Pattern
                 .compile(reverseMessageRegex, Pattern.CASE_INSENSITIVE)
                 .matcher(rawMessageContent);
