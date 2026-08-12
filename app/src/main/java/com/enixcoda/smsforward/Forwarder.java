@@ -3,12 +3,18 @@ package com.enixcoda.smsforward;
 import android.telephony.SmsManager;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 public class Forwarder {
     static final int MAX_SMS_LENGTH = 120;
 
     public static void sendSMS(String number, String content) {
         SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(number, null, content, null, null);
+        ArrayList<String> fragments = smsManager.divideMessage(content);
+        if (fragments.size() > 1)
+            smsManager.sendMultipartTextMessage(number, null, fragments, null, null);
+        else
+            smsManager.sendTextMessage(number, null, content, null, null);
     }
 
     public static void forwardViaSMS(String senderNumber, String forwardContent, String forwardNumber) {

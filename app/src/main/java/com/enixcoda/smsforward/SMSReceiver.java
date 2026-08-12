@@ -11,8 +11,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsMessage;
-
 import android.telephony.TelephonyManager;
+
 import androidx.preference.PreferenceManager;
 
 public class SMSReceiver extends BroadcastReceiver {
@@ -25,7 +25,6 @@ public class SMSReceiver extends BroadcastReceiver {
 
         final boolean enableSMS = sharedPreferences.getBoolean(context.getString(R.string.key_enable_sms), false);
         final String targetNumber = sharedPreferences.getString(context.getString(R.string.key_target_sms), "");
-        final String defaultCountryIso = ((TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE)).getNetworkCountryIso();
 
         final boolean enableWeb = sharedPreferences.getBoolean(context.getString(R.string.key_enable_web), false);
         final String targetWeb = sharedPreferences.getString(context.getString(R.string.key_target_web), "");
@@ -47,12 +46,10 @@ public class SMSReceiver extends BroadcastReceiver {
             String senderLabel = (senderNames.isEmpty() ? "" : senderNames + " ") + "(" + senderNumber + ")";
             String rawMessageContent = currentMessage.getDisplayMessageBody();
 
-            if (areSamePhoneNumber(senderNumber, targetNumber, defaultCountryIso)) {
+            if (areSamePhoneNumber(senderNumber, targetNumber, context)) {
                 // reverse message
-                boolean isAttemptingReverseMessage = ReverseMessageParser
-                        .isAttemptingReverseMessage(rawMessageContent);
-                if (isAttemptingReverseMessage)
-                    processReverseMessage(context, rawMessageContent, targetNumber, defaultCountryIso);
+                if (enableSMS && ReverseMessageParser.isAttemptingReverseMessage(rawMessageContent))
+                    processReverseMessage(context, rawMessageContent, targetNumber);
             } else {
                 // normal message, forwarded
                 if (enableSMS && !targetNumber.equals(""))
@@ -82,8 +79,13 @@ public class SMSReceiver extends BroadcastReceiver {
         return String.join(", ", senderContactNames);
     }
 
-    private boolean areSamePhoneNumber(String phoneNumber1, String phoneNumber2,
-                                       String defaultCountryIso) {
+    private boolean areSamePhoneNumber(String phoneNumber1, String phoneNumber2, Context context) {
+        if (phoneNumber1 == null || phoneNumber2 == null)
+            return false;
+        if (phoneNumber1.equals(phoneNumber2))
+            return true;
+
+        String defaultCountryIso = getNetworkCountryIsoOrDefault(context);
         return PhoneNumberMatcher.areSame(
                 phoneNumber1,
                 phoneNumber2,
@@ -91,15 +93,23 @@ public class SMSReceiver extends BroadcastReceiver {
         );
     }
 
-    private void processReverseMessage(Context context, String rawMessageContent,
-                                       String targetNumber, String defaultCountryIso) {
+    private String getNetworkCountryIsoOrDefault(Context context) {
+        TelephonyManager telephonyManager = context.getSystemService(TelephonyManager.class);
+        if (telephonyManager == null)
+            return "";
+        String countryIso = telephonyManager.getNetworkCountryIso();
+        return countryIso == null ? "" : countryIso;
+    }
+
+    private void processReverseMessage(Context context, String rawMessageContent, String targetNumber) {
         ReverseMessageParser.Result result = ReverseMessageParser.parse(rawMessageContent);
         if (!result.isValid()) {
             Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_bad_format));
             return;
         }
 
-        String forwardNumber = PhoneNumberUtils.formatNumberToE164(result.getPhoneNumber(), defaultCountryIso);
+        String forwardNumber = PhoneNumberUtils.formatNumberToE164(
+                result.getPhoneNumber(), getNetworkCountryIsoOrDefault(context));
         if (forwardNumber == null) {
             Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_bad_phone_number));
             return;
@@ -113,6 +123,7 @@ public class SMSReceiver extends BroadcastReceiver {
 
         Forwarder.sendSMS(forwardNumber, forwardContent);
 
-        Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_successfully_sent_message_to) + forwardNumber);
+        Forwarder.sendSMS(targetNumber,
+                context.getString(R.string.reverse_message_successfully_sent_message_to) + forwardNumber);
     }
 }
