@@ -15,9 +15,6 @@ import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import androidx.preference.PreferenceManager;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class SMSReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -52,7 +49,8 @@ public class SMSReceiver extends BroadcastReceiver {
 
             if (areSamePhoneNumber(senderNumber, targetNumber, defaultCountryIso)) {
                 // reverse message
-                boolean isAttemptingReverseMessage = rawMessageContent.toLowerCase().startsWith("to");
+                boolean isAttemptingReverseMessage = ReverseMessageParser
+                        .isAttemptingReverseMessage(rawMessageContent);
                 if (isAttemptingReverseMessage)
                     processReverseMessage(context, rawMessageContent, targetNumber, defaultCountryIso);
             } else {
@@ -86,30 +84,29 @@ public class SMSReceiver extends BroadcastReceiver {
 
     private boolean areSamePhoneNumber(String phoneNumber1, String phoneNumber2,
                                        String defaultCountryIso) {
-        return PhoneNumberUtils.formatNumberToE164(phoneNumber1, defaultCountryIso)
-                .equals(PhoneNumberUtils.formatNumberToE164(phoneNumber2, defaultCountryIso));
+        return PhoneNumberMatcher.areSame(
+                phoneNumber1,
+                phoneNumber2,
+                number -> PhoneNumberUtils.formatNumberToE164(number, defaultCountryIso)
+        );
     }
 
     private void processReverseMessage(Context context, String rawMessageContent,
-                                              String targetNumber, String defaultCountryIso) {
-        final String reverseMessageRegex = "^to\\s+([^:]+):\\n?([\\s\\S]+)$";
-        Matcher matcher = Pattern
-                .compile(reverseMessageRegex, Pattern.CASE_INSENSITIVE)
-                .matcher(rawMessageContent);
-
-        if (!matcher.find()) {
+                                       String targetNumber, String defaultCountryIso) {
+        ReverseMessageParser.Result result = ReverseMessageParser.parse(rawMessageContent);
+        if (!result.isValid()) {
             Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_bad_format));
             return;
         }
 
-        String forwardNumber = PhoneNumberUtils.formatNumberToE164(matcher.group(1), defaultCountryIso);
+        String forwardNumber = PhoneNumberUtils.formatNumberToE164(result.getPhoneNumber(), defaultCountryIso);
         if (forwardNumber == null) {
             Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_bad_phone_number));
             return;
         }
 
-        String forwardContent = matcher.group(2);
-        if (forwardContent == null || forwardContent.isBlank()) {
+        String forwardContent = result.getMessageContent();
+        if (ReverseMessageParser.isBlank(forwardContent)) {
             Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_no_message_content));
             return;
         }
