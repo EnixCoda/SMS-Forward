@@ -48,7 +48,7 @@ public class SMSReceiver extends BroadcastReceiver {
 
             if (areSamePhoneNumber(senderNumber, targetNumber, context)) {
                 // reverse message
-                if (enableSMS && ReverseMessageParser.isAttemptingReverseMessage(rawMessageContent))
+                if (ReverseMessageParser.isAttemptingReverseMessage(rawMessageContent))
                     processReverseMessage(context, rawMessageContent, targetNumber);
             } else {
                 // normal message, forwarded
