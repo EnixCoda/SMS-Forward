@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
@@ -62,21 +63,39 @@ public class SMSReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * Looks up the contact name(s) for a given phone number.
+     * Uses PhoneNumberUtils.normalizeNumber() and PhoneLookup to handle formatting differences.
+     */
     private String lookupContactName(Context context, String phoneNumber) {
-        Uri filterUri = Uri.withAppendedPath(Phone.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-        String[] projection = new String[]{Phone.DISPLAY_NAME};
-        String[] senderContactNames = {};
-        try (Cursor cur = context.getContentResolver().query(filterUri, projection, null, null, null)) {
-            if (cur != null) {
-                senderContactNames = new String[cur.getCount()];
-                int i = 0;
-                while (cur.moveToNext()) {
-                    senderContactNames[i] = cur.getString(0);
-                    i++;
+        if (phoneNumber == null || phoneNumber.isEmpty()) return "";
+
+        // Normalize the number (strip spaces, dashes, parentheses, etc.)
+        String normalized = PhoneNumberUtils.normalizeNumber(phoneNumber);
+        // Use PhoneLookup – the standard API for number-to-contact resolution
+        Uri uri = Uri.withAppendedPath(
+                ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                Uri.encode(normalized)
+        );
+        String[] projection = new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME};
+
+        try (Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null)) {
+            if (cursor != null) {
+                java.util.ArrayList<String> names = new java.util.ArrayList<>();
+                while (cursor.moveToNext()) {
+                    String name = cursor.getString(0);
+                    if (name != null && !name.isEmpty()) {
+                        names.add(name);
+                    }
+                }
+                if (!names.isEmpty()) {
+                    return String.join(", ", names);
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return String.join(", ", senderContactNames);
+        return ""; // No contact found
     }
 
     private boolean areSamePhoneNumber(String phoneNumber1, String phoneNumber2, Context context) {

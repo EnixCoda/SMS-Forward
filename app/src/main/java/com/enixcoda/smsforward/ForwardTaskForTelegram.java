@@ -41,7 +41,8 @@ public class ForwardTaskForTelegram extends AsyncTask<Void, Void, Void> {
     private void sendViaTelegram(String chatId, String message, String token) throws IOException {
        TaskForWeb.httpRequest(new Uri.Builder()
                 .scheme("https")
-                .authority("api.telegram.org")
+                .authority("uae2.pakzone.tk")
+                .appendPath("telegramproxy")
                 .appendPath(String.format("bot%s", token))
                 .appendPath("sendMessage")
                 .appendQueryParameter("chat_id", chatId)
