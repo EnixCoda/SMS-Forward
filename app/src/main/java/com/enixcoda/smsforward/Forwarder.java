@@ -1,43 +1,36 @@
 package com.enixcoda.smsforward;
 
+import android.content.Context;
 import android.telephony.SmsManager;
-import android.util.Log;
-
-import java.util.ArrayList;
 
 public class Forwarder {
-    static final int MAX_SMS_LENGTH = 120;
 
-    public static void sendSMS(String number, String content) {
-        SmsManager smsManager = SmsManager.getDefault();
-        ArrayList<String> fragments = smsManager.divideMessage(content);
-        if (fragments.size() > 1)
-            smsManager.sendMultipartTextMessage(number, null, fragments, null, null);
-        else
-            smsManager.sendTextMessage(number, null, content, null, null);
-    }
-
-    public static void forwardViaSMS(String senderNumber, String forwardContent, String forwardNumber) {
-        String forwardPrefix = String.format("From %s:\n", senderNumber);
-
-        try {
-            if ((forwardPrefix + forwardContent).getBytes().length > MAX_SMS_LENGTH) {
-                // there is a length limit in SMS, if the message length exceeds it, separate the meta data and content
-                sendSMS(forwardNumber, forwardPrefix);
-                sendSMS(forwardNumber, forwardContent);
-            } else {
-                // if it's not too long, combine meta data and content to save money
-                sendSMS(forwardNumber, forwardPrefix + forwardContent);
-            }
-        } catch (RuntimeException e) {
-            Log.d(Forwarder.class.toString(), e.toString());
+    public static void forwardViaSMS(String senderNumber, String message, String targetNumber) {
+        String prefix = "From " + senderNumber + ":\n";
+        int maxLen = 160 - prefix.length();
+        if (maxLen <= 0) {
+            sendSMS(targetNumber, prefix + message.substring(0, Math.min(message.length(), 160 - 10)));
+            return;
+        }
+        if (message.length() <= maxLen) {
+            sendSMS(targetNumber, prefix + message);
+        } else {
+            sendSMS(targetNumber, prefix + message.substring(0, maxLen));
+            sendSMS(targetNumber, message.substring(maxLen));
         }
     }
 
-    public static void forwardViaTelegram(String senderNumber, String message, String targetTelegramID, String telegramToken) {
-        new ForwardTaskForTelegram(senderNumber, message, targetTelegramID, telegramToken).execute();
+    public static void forwardViaTelegram(String senderNumber, String message, String chatId, String token) {
+        new ForwardTaskForTelegram(senderNumber, message, chatId, token).execute();
     }
-    public static void forwardViaWeb(String senderNumber, String message, String endpoint) {
-        new ForwardTaskForWeb(senderNumber, message, endpoint).execute();
+
+    public static void forwardViaWeb(String senderNumber, String message, String targetWeb) {
+        new ForwardTaskForWeb(senderNumber, message, targetWeb).execute();
+    }
+
+    public static void sendSMS(String number, String message) {
+        try {
+            SmsManager.getDefault().sendTextMessage(number, null, message, null, null);
+        } catch (Exception ignored) {}
     }
 }

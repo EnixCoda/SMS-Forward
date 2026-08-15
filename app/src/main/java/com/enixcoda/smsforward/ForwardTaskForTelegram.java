@@ -3,15 +3,10 @@ package com.enixcoda.smsforward;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 public class ForwardTaskForTelegram extends AsyncTask<Void, Void, Void> {
+
     String senderNumber;
     String message;
     String chatId;
@@ -27,11 +22,13 @@ public class ForwardTaskForTelegram extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... voids) {
         try {
-            sendViaTelegram(
-                    chatId,
-                    String.format("Message from %s:\n%s", senderNumber, message),
-                    token
-                    );
+            // Format with sender info + reply instruction
+            String formattedMessage = "📨 *SMS Forward*\n" +
+                                     "👤 *From:* " + senderNumber + "\n" +
+                                     "💬 *Message:* " + message + "\n\n" +
+                                     "✏️ _Reply to this message to send an SMS back._";
+
+            sendViaTelegram(chatId, formattedMessage, token);
         } catch (IOException e) {
             Log.d(Forwarder.class.toString(), e.toString());
         }
@@ -39,14 +36,17 @@ public class ForwardTaskForTelegram extends AsyncTask<Void, Void, Void> {
     }
 
     private void sendViaTelegram(String chatId, String message, String token) throws IOException {
-       TaskForWeb.httpRequest(new Uri.Builder()
-                .scheme("https")
-                .authority("uae2.pakzone.tk")
-                .appendPath("telegramproxy")
-                .appendPath(String.format("bot%s", token))
-                .appendPath("sendMessage")
-                .appendQueryParameter("chat_id", chatId)
-                .appendQueryParameter("text", message)
-                .build().toString(), message);
+        TaskForWeb.httpRequest(
+                new Uri.Builder()
+                        .scheme("https")
+                        .authority("uae2.pakzone.tk")
+                        .appendPath("telegramproxy")
+                        .appendPath(String.format("bot%s", token))
+                        .appendPath("sendMessage")
+                        .appendQueryParameter("chat_id", chatId)
+                        .appendQueryParameter("text", message)
+                        .build().toString(),
+                message
+        );
     }
 }

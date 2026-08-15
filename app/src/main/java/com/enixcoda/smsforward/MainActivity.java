@@ -1,8 +1,8 @@
 package com.enixcoda.smsforward;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        requestPermissions(new String[] {
+        requestPermissions(new String[]{
                 Manifest.permission.SEND_SMS,
                 Manifest.permission.INTERNET,
                 Manifest.permission.READ_CONTACTS
@@ -25,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
                     .replace(R.id.settings, new SettingsFragment())
                     .commit();
         }
+
+        // Start the Telegram polling service
+        startService(new Intent(this, TelegramReceiveService.class));
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {

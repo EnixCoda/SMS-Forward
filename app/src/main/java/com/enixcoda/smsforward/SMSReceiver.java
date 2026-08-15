@@ -1,7 +1,5 @@
 package com.enixcoda.smsforward;
 
-import static android.provider.ContactsContract.CommonDataKinds.*;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +11,6 @@ import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
-
 import androidx.preference.PreferenceManager;
 
 public class SMSReceiver extends BroadcastReceiver {
@@ -43,16 +40,14 @@ public class SMSReceiver extends BroadcastReceiver {
         for (Object messageObj : pduObjects) {
             SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) messageObj, (String) bundle.get("format"));
             String senderNumber = currentMessage.getDisplayOriginatingAddress();
-            String senderNames = lookupContactName(context, senderNumber);
-            String senderLabel = (senderNames.isEmpty() ? "" : senderNames + " ") + "(" + senderNumber + ")";
+            String senderName = lookupContactName(context, senderNumber);
+            String senderLabel = (senderName.isEmpty() ? "" : senderName + " ") + "(" + senderNumber + ")";
             String rawMessageContent = currentMessage.getDisplayMessageBody();
 
             if (areSamePhoneNumber(senderNumber, targetNumber, context)) {
-                // reverse message
                 if (ReverseMessageParser.isAttemptingReverseMessage(rawMessageContent))
                     processReverseMessage(context, rawMessageContent, targetNumber);
             } else {
-                // normal message, forwarded
                 if (enableSMS && !targetNumber.equals(""))
                     Forwarder.forwardViaSMS(senderLabel, rawMessageContent, targetNumber);
                 if (enableTelegram && !targetTelegram.equals("") && !telegramToken.equals(""))
@@ -63,47 +58,22 @@ public class SMSReceiver extends BroadcastReceiver {
         }
     }
 
-    /**
-     * Looks up the contact name(s) for a given phone number.
-     * Uses PhoneNumberUtils.normalizeNumber() and PhoneLookup to handle formatting differences.
-     */
     private String lookupContactName(Context context, String phoneNumber) {
-        if (phoneNumber == null || phoneNumber.isEmpty()) return "";
-
-        // Normalize the number (strip spaces, dashes, parentheses, etc.)
-        String normalized = PhoneNumberUtils.normalizeNumber(phoneNumber);
-        // Use PhoneLookup – the standard API for number-to-contact resolution
-        Uri uri = Uri.withAppendedPath(
-                ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-                Uri.encode(normalized)
-        );
-        String[] projection = new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME};
-
-        try (Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null)) {
-            if (cursor != null) {
-                java.util.ArrayList<String> names = new java.util.ArrayList<>();
-                while (cursor.moveToNext()) {
-                    String name = cursor.getString(0);
-                    if (name != null && !name.isEmpty()) {
-                        names.add(name);
-                    }
-                }
-                if (!names.isEmpty()) {
-                    return String.join(", ", names);
+        try {
+            Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+            String[] projection = {ContactsContract.PhoneLookup.DISPLAY_NAME};
+            try (Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    return cursor.getString(0);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return ""; // No contact found
+        } catch (Exception ignored) {}
+        return "";
     }
 
     private boolean areSamePhoneNumber(String phoneNumber1, String phoneNumber2, Context context) {
-        if (phoneNumber1 == null || phoneNumber2 == null)
-            return false;
-        if (phoneNumber1.equals(phoneNumber2))
-            return true;
-
+        if (phoneNumber1 == null || phoneNumber2 == null) return false;
+        if (phoneNumber1.equals(phoneNumber2)) return true;
         String defaultCountryIso = getNetworkCountryIsoOrDefault(context);
         return PhoneNumberMatcher.areSame(
                 phoneNumber1,
@@ -114,8 +84,7 @@ public class SMSReceiver extends BroadcastReceiver {
 
     private String getNetworkCountryIsoOrDefault(Context context) {
         TelephonyManager telephonyManager = context.getSystemService(TelephonyManager.class);
-        if (telephonyManager == null)
-            return "";
+        if (telephonyManager == null) return "";
         String countryIso = telephonyManager.getNetworkCountryIso();
         return countryIso == null ? "" : countryIso;
     }
@@ -126,22 +95,18 @@ public class SMSReceiver extends BroadcastReceiver {
             Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_bad_format));
             return;
         }
-
         String forwardNumber = PhoneNumberUtils.formatNumberToE164(
                 result.getPhoneNumber(), getNetworkCountryIsoOrDefault(context));
         if (forwardNumber == null) {
             Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_bad_phone_number));
             return;
         }
-
         String forwardContent = result.getMessageContent();
         if (ReverseMessageParser.isBlank(forwardContent)) {
             Forwarder.sendSMS(targetNumber, context.getString(R.string.reverse_message_no_message_content));
             return;
         }
-
         Forwarder.sendSMS(forwardNumber, forwardContent);
-
         Forwarder.sendSMS(targetNumber,
                 context.getString(R.string.reverse_message_successfully_sent_message_to) + forwardNumber);
     }
