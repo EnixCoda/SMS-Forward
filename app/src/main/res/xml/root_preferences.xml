@@ -1,17 +1,13 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:iconSpaceReserved="false">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        app:iconSpaceReserved="false"
-        app:title="@string/header_sms">
+        android:title="@string/header_sms">
 
-        <SwitchPreferenceCompat
+        <SwitchPreference
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:key="@string/key_enable_sms"
-            app:iconSpaceReserved="false"
-            app:title="@string/enable_sms" />
+            android:title="@string/enable_sms" />
         <EditTextPreference
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -20,51 +16,42 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/target_title_sms"
-            app:iconSpaceReserved="false"
-            app:summary="@string/target_summary_sms" />
-
+            android:summary="@string/target_summary_sms" />
     </PreferenceCategory>
     <PreferenceCategory
-        app:title="@string/header_telegram"
-        app:iconSpaceReserved="false">
+        android:title="@string/header_telegram">
 
-        <SwitchPreferenceCompat
-            app:iconSpaceReserved="false"
+        <SwitchPreference
             android:key="@string/key_enable_telegram"
-            app:title="@string/enable_telegram" />
+            android:title="@string/enable_telegram" />
         <EditTextPreference
             android:defaultValue=""
             android:key="@string/key_target_telegram"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/target_title_telegram"
-            app:iconSpaceReserved="false" />
+            android:title="@string/target_title_telegram" />
         <EditTextPreference
             android:defaultValue=""
             android:key="@string/key_telegram_apikey"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/title_telegram_apikey"
-            app:iconSpaceReserved="false" />
+            android:title="@string/title_telegram_apikey" />
 
     </PreferenceCategory>
 
     <PreferenceCategory
-        app:title="@string/header_web"
-        app:iconSpaceReserved="false">
+        android:title="@string/header_web">
 
-        <SwitchPreferenceCompat
-            app:iconSpaceReserved="false"
+        <SwitchPreference
             android:key="@string/key_enable_web"
-            app:title="@string/enable_web" />
+            android:title="@string/enable_web" />
         <EditTextPreference
             android:defaultValue=""
             android:key="@string/key_target_web"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/target_title_web"
-            android:summary="@string/target_summary_web"
-            app:iconSpaceReserved="false" />
+            android:summary="@string/target_summary_web" />
 
     </PreferenceCategory>
 

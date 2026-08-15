@@ -2,17 +2,14 @@ package com.enixcoda.smsforward;
 
 import android.Manifest;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceFragmentCompat;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
         requestPermissions(new String[] {
                 Manifest.permission.SEND_SMS,
                 Manifest.permission.INTERNET,
@@ -20,17 +17,18 @@ public class MainActivity extends AppCompatActivity {
         }, 0);
 
         if (savedInstanceState == null) {
-            getSupportFragmentManager()
+            getFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.settings, new SettingsFragment())
+                    .replace(android.R.id.content, new SettingsFragment())
                     .commit();
         }
     }
 
-    public static class SettingsFragment extends PreferenceFragmentCompat {
+    public static class SettingsFragment extends PreferenceFragment {
         @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.root_preferences, rootKey);
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.root_preferences);
         }
     }
 }

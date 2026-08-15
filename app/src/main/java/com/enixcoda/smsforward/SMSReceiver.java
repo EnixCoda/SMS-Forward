@@ -9,11 +9,10 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
-
-import androidx.preference.PreferenceManager;
 
 public class SMSReceiver extends BroadcastReceiver {
     @Override
