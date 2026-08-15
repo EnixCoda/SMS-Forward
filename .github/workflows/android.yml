@@ -2,9 +2,9 @@ name: Android CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master-deepseek" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master-deepseek" ]
 
 jobs:
   build:
