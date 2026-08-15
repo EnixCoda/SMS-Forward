@@ -17,6 +17,11 @@
             android:singleLine="true"
             android:title="@string/target_title_sms"
             android:summary="@string/target_summary_sms" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_keep_sms_together"
+            android:title="@string/keep_sms_together"
+            android:summary="@string/keep_sms_together_summary" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/header_telegram">

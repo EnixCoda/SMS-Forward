@@ -24,6 +24,8 @@ public class SMSReceiver extends BroadcastReceiver {
 
         final boolean enableSMS = sharedPreferences.getBoolean(context.getString(R.string.key_enable_sms), false);
         final String targetNumber = sharedPreferences.getString(context.getString(R.string.key_target_sms), "");
+        final boolean keepSmsTogether = sharedPreferences.getBoolean(
+                context.getString(R.string.key_keep_sms_together), false);
 
         final boolean enableWeb = sharedPreferences.getBoolean(context.getString(R.string.key_enable_web), false);
         final String targetWeb = sharedPreferences.getString(context.getString(R.string.key_target_web), "");
@@ -52,7 +54,7 @@ public class SMSReceiver extends BroadcastReceiver {
             } else {
                 // normal message, forwarded
                 if (enableSMS && !targetNumber.equals(""))
-                    Forwarder.forwardViaSMS(senderLabel, rawMessageContent, targetNumber);
+                    Forwarder.forwardViaSMS(senderLabel, rawMessageContent, targetNumber, keepSmsTogether);
                 if (enableTelegram && !targetTelegram.equals("") && !telegramToken.equals(""))
                     Forwarder.forwardViaTelegram(senderLabel, rawMessageContent, targetTelegram, telegramToken);
                 if (enableWeb && !targetWeb.equals(""))

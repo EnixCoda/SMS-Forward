@@ -8,6 +8,9 @@
     <string name="key_target_sms">key_sms_target</string>
     <string name="target_title_sms">Target phone number</string>
     <string name="target_summary_sms">example: +86 10000</string>
+    <string name="key_keep_sms_together">key_keep_sms_together</string>
+    <string name="keep_sms_together">Keep sender and message together</string>
+    <string name="keep_sms_together_summary">Send as one logical multipart message. Your carrier or receiving phone may still display its SMS segments separately.</string>
 
     <!-- Telegram -->
     <string name="key_enable_telegram">key_enable_telegram</string>
