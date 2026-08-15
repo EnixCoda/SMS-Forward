@@ -11,6 +11,7 @@ public class MainActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestPermissions(new String[] {
+                Manifest.permission.RECEIVE_SMS,
                 Manifest.permission.SEND_SMS,
                 Manifest.permission.INTERNET,
                 Manifest.permission.READ_CONTACTS
